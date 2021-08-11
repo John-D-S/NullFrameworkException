@@ -11,9 +11,11 @@ namespace NullFrameworkException
 		/// Attempts to retrieve the runnable behavior from the passed gameobject or its children
 		/// </summary>
 		/// <param name="_runnable">The reference the runnable will be set to.</param>
+		/// <param name="_optional">Whether or not the runnable is optional</param>
 		/// <param name="_from">The gameobject we are attempting to get a runnable from</param>
-		public static bool Validate<TRunnable>(ref TRunnable _runnable, GameObject _from) where TRunnable : IRunnable
+		public static bool Validate<TRunnable>(ref TRunnable _runnable, GameObject _from, bool _optional) where TRunnable : IRunnable
 		{
+			
 			//if the passed Runnable is already set, return true
 			if(_runnable != null)
 			{
@@ -44,7 +46,11 @@ namespace NullFrameworkException
 				}
 			}
 
-			Debug.LogException(new NullReferenceException($"Component {typeof(TRunnable).Name} is not present in the hierarchy of gameobject {_from.name}."), _from);
+			if(!_optional)
+			{
+				Debug.LogException(new NullReferenceException($"Component {typeof(TRunnable).Name} is not present in the hierarchy of gameobject {_from.name}."), _from);
+			}
+			
 			return false;
 		}
 
@@ -54,10 +60,10 @@ namespace NullFrameworkException
 		/// <param name="_runnable">The runnable being setup.</param>
 		/// <param name="_from">The gameObject the runnable is attached to.</param>
 		/// <param name="_params">Any additional information the runnable's setup function needs.</param>
-		public static bool Setup<TRunnable>(ref TRunnable _runnable, GameObject _from, params object[] _params) where TRunnable : IRunnable
+		public static bool Setup<TRunnable>(ref TRunnable _runnable, GameObject _from, bool _optional, params object[] _params) where TRunnable : IRunnable
 		{
 			//validate the component, if we can, set it up and return true
-			if(Validate(ref _runnable, _from))
+			if(Validate(ref _runnable, _from, _optional))
 			{
 				_runnable.Setup(_params);
 				return true;
@@ -74,10 +80,10 @@ namespace NullFrameworkException
 		/// <param name="_from">The gameObject the runnable is attached to.</param>
 		/// <param name="_params">Any additional information the Runnable's run function needs.</param>
 		/// <typeparam name="TRunnable"></typeparam>
-		public static void Run<TRunnable>(ref TRunnable _runnable, GameObject _from, params object[] _params) where TRunnable : IRunnable
+		public static void Run<TRunnable>(ref TRunnable _runnable, GameObject _from, bool _optional, params object[] _params) where TRunnable : IRunnable
 		{
 			// Validate the component in case we didn't do it earlier
-			if(Validate(ref _runnable, _from))
+			if(Validate(ref _runnable, _from, _optional))
 			{
 				_runnable.Run(_params);
 			}
